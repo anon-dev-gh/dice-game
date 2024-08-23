@@ -4,4 +4,5 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: devcontainer
+    # Despite being the default CMD it still needs to be specified...
     command: sleep infinity

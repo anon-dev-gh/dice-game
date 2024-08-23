@@ -14,15 +14,12 @@ ENV UV_SYSTEM_PYTHON=1
 COPY requirements/requirements.in /workspace/requirements/requirements.in
 RUN uv pip install -r /workspace/requirements/requirements.in
 
-# Copy the rest of the application code
-COPY . .
 
 # Stage 2: Test
 FROM build AS test
 
+# Install test dependencies
 COPY requirements/requirements-test.in /workspace/requirements/requirements-test.in
-
-# Install testing and type-checking dependencies using uv
 RUN uv pip install -r /workspace/requirements/requirements-test.in
 
 # Run tests and type checks
@@ -33,10 +30,6 @@ FROM test AS devcontainer
 
 # Set working directory
 WORKDIR /workspace
-
-# Install the test dependencies using uv
-COPY requirements/requirements-test.in /workspace/requirements/requirements-test.in
-RUN uv pip install -r /workspace/requirements/requirements-test.in
 
 # Add a non-root user
 ARG USERNAME=vscode
@@ -51,9 +44,6 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN mkdir -p /etc/sudoers.d \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
-
-# Copy from build stage
-COPY --from=build /workspace /workspace
 
 # Adds tig for git management
 RUN apt update && apt install -y tig

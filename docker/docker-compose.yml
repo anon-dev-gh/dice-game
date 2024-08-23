@@ -14,7 +14,9 @@ services:
       - "8000:8000"
     depends_on:
       - mysql
-    command: ["your_production_start_command"]
+    volumes:
+      - ../:/workspace/:cached
+    command: ["your_production_start_command"]      
 
   mysql:
     image: mysql:5.7

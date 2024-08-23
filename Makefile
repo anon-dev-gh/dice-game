@@ -1,5 +1,3 @@
-# Makefile
-
 .PHONY: compile-dependencies
 
 # Command to compile requirements.txt from requirements.in using Docker
