@@ -14,7 +14,6 @@ ENV UV_SYSTEM_PYTHON=1
 COPY requirements/requirements.in /workspace/requirements/requirements.in
 RUN uv pip install -r /workspace/requirements/requirements.in
 
-
 # Stage 2: Test
 FROM build AS test
 
@@ -53,3 +52,9 @@ USER $USERNAME
 
 # Default command to keep the container running
 CMD ["sleep", "infinity"]
+
+# Stage 4: Client
+FROM build AS client
+# FIXME: Horrible hack
+COPY . . 
+ENTRYPOINT ["python", "src/dice_game/cli/client.py"]
