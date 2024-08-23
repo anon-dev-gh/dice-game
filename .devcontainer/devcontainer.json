@@ -1,7 +1,10 @@
 {
     "name": "Python DevContainer with Docker Compose",
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "devcontainer",
+    "dockerComposeFile": [
+        "../docker/docker-compose.yml",
+        "docker-compose.devcontainer.yml"
+    ],
+    "service": "app",
     "workspaceFolder": "/workspace",
     "customizations": {
         "vscode": {
