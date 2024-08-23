@@ -1,4 +1,5 @@
-# Stage 1: Build
+# Stage: Build
+# -------------------------------------------------------------------------------------
 FROM python:3.11-slim AS build
 
 # Set working directory
@@ -14,7 +15,23 @@ ENV UV_SYSTEM_PYTHON=1
 COPY requirements/requirements.in /workspace/requirements/requirements.in
 RUN uv pip install -r /workspace/requirements/requirements.in
 
-# Stage 2: Test
+
+# Stage: prod
+# -------------------------------------------------------------------------------------
+FROM python:3.11-slim AS prod
+
+WORKDIR /workspace
+
+# Copy the Python packages from the build stage
+COPY --from=build /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+# And the application code
+COPY . .
+
+ENV PYTHONPATH=src
+
+# Stage: test
+# -------------------------------------------------------------------------------------
 FROM build AS test
 
 # Install test dependencies
@@ -24,7 +41,8 @@ RUN uv pip install -r /workspace/requirements/requirements-test.in
 # Run tests and type checks
 CMD ["bash", "-c", "pytest --junitxml=report.xml && mypy src"]
 
-# Stage 3: Devcontainer
+# Stage: devcontainer
+# -------------------------------------------------------------------------------------
 FROM test AS devcontainer
 
 # Set working directory
@@ -52,9 +70,3 @@ USER $USERNAME
 
 # Default command to keep the container running
 CMD ["sleep", "infinity"]
-
-# Stage 4: Client
-FROM build AS client
-# FIXME: Horrible hack
-COPY . . 
-ENTRYPOINT ["python", "src/dice_game/cli/client.py"]
