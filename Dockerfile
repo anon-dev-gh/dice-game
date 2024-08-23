@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Stage 1: Build
 FROM python:3.11-slim AS build
 
@@ -13,8 +11,8 @@ RUN pip install --no-cache-dir uv
 ENV UV_SYSTEM_PYTHON=1
 
 # Install the base dependencies using uv
-COPY docker/requirements.in /workspace/docker/requirements.in
-RUN uv pip install -r /workspace/docker/requirements.in
+COPY requirements/requirements.in /workspace/requirements/requirements.in
+RUN uv pip install -r /workspace/requirements/requirements.in
 
 # Copy the rest of the application code
 COPY . .
@@ -22,10 +20,10 @@ COPY . .
 # Stage 2: Test
 FROM build AS test
 
-COPY docker/requirements-test.in /workspace/docker/requirements-test.in
+COPY requirements/requirements-test.in /workspace/requirements/requirements-test.in
 
 # Install testing and type-checking dependencies using uv
-RUN uv pip install -r /workspace/docker/requirements-test.in
+RUN uv pip install -r /workspace/requirements/requirements-test.in
 
 # Run tests and type checks
 CMD ["bash", "-c", "pytest --junitxml=report.xml && mypy src"]
@@ -37,8 +35,8 @@ FROM test AS devcontainer
 WORKDIR /workspace
 
 # Install the test dependencies using uv
-COPY docker/requirements-test.in /workspace/docker/requirements-test.in
-RUN uv pip install -r /workspace/docker/requirements-test.in
+COPY requirements/requirements-test.in /workspace/requirements/requirements-test.in
+RUN uv pip install -r /workspace/requirements/requirements-test.in
 
 # Add a non-root user
 ARG USERNAME=vscode
