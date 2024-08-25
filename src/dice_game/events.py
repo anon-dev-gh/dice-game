@@ -7,6 +7,11 @@ class Event:
 
 
 @dataclass
+class GameStartsEvent(Event):
+    pass
+
+
+@dataclass
 class PlayerJoinsEvent(Event):
     player_id: int
     player_name: str

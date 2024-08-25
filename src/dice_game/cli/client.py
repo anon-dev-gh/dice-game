@@ -1,5 +1,3 @@
-# src/dice_game/cli_client.py
-
 import argparse
 import asyncio
 import json

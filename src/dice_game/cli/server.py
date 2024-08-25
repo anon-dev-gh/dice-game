@@ -1,5 +1,5 @@
-import argparse
 import asyncio
+from functools import partial
 
 from dice_game.dispatcher import EventDispatcher
 from dice_game.events import (
@@ -18,30 +18,29 @@ from dice_game.handlers import (
 from dice_game.websocket_server import WebSocketServer
 
 
-def start_server(host: str, port: int):
-    async def main():
-        # Set up the dispatcher and handlers
-        dispatcher = EventDispatcher()
-        dispatcher.register_handler(PlayerJoinsEvent, handle_player_joins)
-        dispatcher.register_handler(PlayerRollsEvent, handle_player_rolls)
-        dispatcher.register_handler(TurnFinishedEvent, handle_turn_finished)
-        dispatcher.register_handler(GameOverEvent, handle_game_over)
+async def start_server(host: str, port: int):
+    # Initialize the game
+    game = DiceGame()
 
-        # Set up the game
-        game = DiceGame(dispatcher)
+    # Set up the dispatcher and handlers
+    dispatcher = EventDispatcher()
+    dispatcher.register_handler(PlayerJoinsEvent, partial(handle_player_joins, game))
+    dispatcher.register_handler(PlayerRollsEvent, partial(handle_player_rolls, game))
+    dispatcher.register_handler(TurnFinishedEvent, partial(handle_turn_finished, game))
+    dispatcher.register_handler(GameOverEvent, partial(handle_game_over, game))
 
-        # Set up the WebSocket server
-        websocket_server = WebSocketServer(
-            host=host, port=port, game=game, dispatcher=dispatcher
-        )
+    # Set up the WebSocket server
+    websocket_server = WebSocketServer(
+        host=host, port=port, game=game, dispatcher=dispatcher
+    )
 
-        # Start the WebSocket server
-        await websocket_server.start()
-
-    asyncio.run(main())
+    # Start the WebSocket server and the game
+    await websocket_server.start()
 
 
 if __name__ == "__main__":
+    import argparse
+
     parser = argparse.ArgumentParser(description="Start the WebSocket game server.")
     parser.add_argument(
         "--host", type=str, default="localhost", help="The host to run the server on."
@@ -51,4 +50,5 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    start_server(args.host, args.port)
+
+    asyncio.run(start_server(args.host, args.port))

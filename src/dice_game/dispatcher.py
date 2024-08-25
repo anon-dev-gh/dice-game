@@ -1,21 +1,21 @@
-from collections import defaultdict
-from typing import Callable, Dict, List, Type, TypeVar
+from typing import Callable, Dict, List, Type
 
-from .events import Event
-
-# Define a generic type variable for events
-E = TypeVar("E", bound=Event)
+from dice_game.events import Event
 
 
 class EventDispatcher:
     def __init__(self) -> None:
-        self._handlers: Dict[Type[Event], List[Callable[[Event], None]]] = defaultdict(
-            list
-        )
+        self._handlers: Dict[Type[Event], List[Callable[[Event], None]]] = {}
 
-    def register_handler(self, event_type: Type[E], handler: Callable[[E], None]):
-        self._handlers[event_type].append(handler)  # type: ignore
+    def register_handler(
+        self, event_type: Type[Event], handler: Callable[[Event], None]
+    ):
+        if event_type not in self._handlers:
+            self._handlers[event_type] = []
+        self._handlers[event_type].append(handler)
 
     def dispatch(self, event: Event):
-        for handler in self._handlers[type(event)]:
-            handler(event)  # type: ignore
+        event_type = type(event)
+        if event_type in self._handlers:
+            for handler in self._handlers[event_type]:
+                handler(event)

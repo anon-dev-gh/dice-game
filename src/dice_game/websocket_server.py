@@ -7,7 +7,7 @@ import websockets
 from dice_game.dispatcher import EventDispatcher
 from dice_game.events import Event, PlayerJoinsEvent, PlayerRollsEvent
 from dice_game.game import DiceGame
-from dice_game.message_parser import MessageParser
+from dice_game.message_parser import EventSerdeRegistry
 
 
 class WebSocketServer:
@@ -19,12 +19,12 @@ class WebSocketServer:
         self.game = game
         self.dispatcher = dispatcher
         self.connections: MutableMapping[int, websockets.WebSocketServerProtocol] = {}
-        self.parser = MessageParser()
+        self.parser = EventSerdeRegistry()
 
     async def handler(self, websocket, path):
         # Handle a new player connection
         async for message in websocket:
-            event = self.parser.parse_message(message)
+            event = self.parser.deserialize(message)
             if event:
                 await self.dispatch_event(event, websocket)
 
